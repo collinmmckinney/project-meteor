@@ -21,7 +21,7 @@ Meteor.methods({
             .then(response => response)
             .catch(err => err);
         const { text } = results[0].fullTextAnnotation;
-        const translation = await translateClient.translate(text, 'en')
+        const translation = await translateClient.translate(text.replace(/\n|\r/g, ''), 'en')
             .then(response => response[0])
             .catch(err => err);
 
