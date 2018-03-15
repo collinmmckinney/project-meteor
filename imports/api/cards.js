@@ -1,28 +1,27 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
-import { HTTP } from 'meteor/http';
+import vision from '@google-cloud/vision';
+import Translate from '@google-cloud/translate';
+
+const visionClient = new vision.ImageAnnotatorClient({ projectId: 'plated-bee-197701', keyFilename: Meteor.settings.googleServiceAccountPath });
+
 
 const Cards = new Mongo.Collection('cards');
 
 Meteor.methods({
-    'Cards.add': ({ imageData }) => {
-        const response = HTTP.call('POST', `https://vision.googleapis.com/v1/images:annotate?key=${Meteor.settings.googleVisionApiKey}`, {
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            data: {
-                requests: [{
-                    image: {
-                        content: imageData
-                    },
-                    features: [{ type: 'TEXT_DETECTION' }]
-                }]
-            }
-        });
-        const parsedText = response.data.responses[0].fullTextAnnotation.text;
+    async addCard({ imageData }) {
+        const request = {
+            image: { content: imageData }
+        };
+
+        const results = await visionClient.textDetection(request)
+            .then(response => response)
+            .catch(err => err);
+
+        const parsedText = results[0].fullTextAnnotation.text;
+
         return parsedText;
-    },
+    }
 });
 
 export default Cards;

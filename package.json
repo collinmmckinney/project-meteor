@@ -6,6 +6,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.36",
+    "@google-cloud/translate": "^1.1.0",
+    "@google-cloud/vision": "^0.16.0",
     "bcrypt": "^1.0.3",
     "meteor-node-stubs": "^0.3.2"
   },
