@@ -2,4 +2,4 @@ Lingnobo
 
 After cloning:
 `npm install`
-`meteor`
+`npm start`
