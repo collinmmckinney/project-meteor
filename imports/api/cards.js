@@ -19,11 +19,11 @@ Meteor.methods({
     async addCard({ imageData }) {
         const results = await visionClient.textDetection({ image: { content: imageData } })
             .then(response => response)
-            .catch(err => err);
-        const { text } = results[0].fullTextAnnotation;
-        const translation = await translateClient.translate(text.replace(/\n|\r/g, ''), 'en')
+            .catch(err => console.log(err));
+        const text = results[0].fullTextAnnotation.text.replace(/\n|\r/g, '');
+        const translation = await translateClient.translate(text, 'en')
             .then(response => response[0])
-            .catch(err => err);
+            .catch(err => console.log(err));
 
         return Cards.insert({ text, translation });
     }
