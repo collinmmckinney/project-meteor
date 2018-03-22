@@ -17,15 +17,39 @@ const Cards = new Mongo.Collection('cards');
 
 Meteor.methods({
     async addCard({ imageData }) {
-        const results = await visionClient.textDetection({ image: { content: imageData } })
+        // Detect text:
+        const visionResponse = await visionClient.textDetection({ image: { content: imageData } })
             .then(response => response)
-            .catch(err => console.log(err));
-        const text = results[0].fullTextAnnotation.text.replace(/\n|\r/g, '');
-        const translation = await translateClient.translate(text, 'en')
-            .then(response => response[0])
-            .catch(err => console.log(err));
+            .catch((err) => {
+                console.log(err);
+                throw new Meteor.Error(500, 'Error 500', 'Google Vision error');
+            });
+        // If no text detected:
+        if (!visionResponse[0].fullTextAnnotation) {
+            console.log('No text found');
+            throw new Meteor.Error(500, 'Error 500', 'No text found in image');
+        }
+        const term = visionResponse[0].fullTextAnnotation.text.replace(/\n|\r/g, '');
 
-        return Cards.insert({ text, translation });
+        // Translate text:
+        const translationResponse = await translateClient.translate(term, 'en')
+            .then(response => response)
+            .catch((err) => {
+                console.log(err);
+                throw new Meteor.Error(500, 'Error 500', 'Google Translate error');
+            });
+        const translation = translationResponse[1].data.translations[0];
+        const definition = translation.translatedText;
+        const termLanguage = translation.detectedSourceLanguage;
+
+        return Cards.insert({
+            term,
+            termLanguage,
+            definition,
+            definitionLanguage: 'en',
+            createdAt: Date.now(),
+            lastReviewedAt: null
+        });
     }
 });
 
