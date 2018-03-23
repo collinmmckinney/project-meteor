@@ -16,7 +16,7 @@ const translateClient = new Translate({
 const Cards = new Mongo.Collection('cards');
 
 Meteor.methods({
-    async addCard({ imageData }) {
+    async addCardFromImage({ imageData }) {
         // Detect text:
         const visionResponse = await visionClient.textDetection({ image: { content: imageData } })
             .then(response => response)
@@ -51,6 +51,9 @@ Meteor.methods({
             createdAt: Date.now(),
             lastReviewedAt: null
         });
+    },
+    async deleteCard({ id }) {
+        return Cards.remove({ _id: id });
     }
 });
 
