@@ -43,6 +43,7 @@ Meteor.methods({
         const termLanguage = translation.detectedSourceLanguage;
 
         return Cards.insert({
+            userId: Meteor.userId(),
             term,
             termLanguage,
             definition,
