@@ -49,12 +49,40 @@ Meteor.methods({
             definition,
             definitionLanguage: 'en',
             createdAt: Date.now(),
-            lastReviewedAt: null
+            lastReviewedAt: null,
+            lastAnsweredCorrectlyAt: null,
+            lastAnsweredIncorrectlyAt: null,
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            level: 0
         });
     },
     async deleteCard({ id }) {
         return Cards.remove({ _id: id });
-    }
+    },
+    async reviewCard({ id }) {
+        return Cards.update({ _id: id }, {
+            $set: { lastReviewedAt: Date.now() }
+        });
+    },
+    async levelUpCard({ id }) {
+        const card = Cards.findOne({ _id: id });
+        if (card.level < 7) {
+            return Cards.update({ _id: id }, {
+                $inc: { level: 1 }
+            });
+        }
+        return 0;
+    },
+    async levelDownCard({ id }) {
+        const card = Cards.findOne({ _id: id });
+        if (card.level > 0) {
+            return Cards.update({ _id: id }, {
+                $inc: { level: -1 }
+            });
+        }
+        return 0;
+    },
 });
 
 export default Cards;
